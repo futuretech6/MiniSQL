@@ -5,3 +5,6 @@ bin
 *.exe
 *.out
 .vscode
+MiniSQL
+*.table
+*.index
