@@ -1,7 +1,4 @@
 #include "IndexManager.h"
-#include "BufferManager.h"
-
-extern BufferManager buf;
 
 int TreeNode::getPtr(int pos) {
     int ptr = 0;
@@ -9,7 +6,6 @@ int TreeNode::getPtr(int pos) {
         ptr = 10 * ptr + buf.bufferBlock[bufferID].values[i] - '0';
     return ptr;
 }
-
 int TreeNode::getRecordNum() {
     int recordNum = 0;
     for (int i = 2; i < 6; i++) {
@@ -21,23 +17,23 @@ int TreeNode::getRecordNum() {
     return recordNum;
 }
 
-Branch::Branch(int bufID, const Index &indexInfo) {
-    bufferID        = bufID;
+Branch::Branch(int vbufNum, const Index &indexInfo) {
+    bufferID        = vbufNum;
     isRoot          = (buf.bufferBlock[bufferID].values[0] == 'R');
     int recordCount = getRecordNum();
-    recordNum       = 0;  // RecordNum will increase when function insert() is called, and finally as
-                          // Large as recordCount
-    ptrParent    = getPtr(6);
+    recordNum = 0;  // RecordNum will increase when function insert is called, and finally as large
+                    // As recordCount
+    ptrFather    = getPtr(6);
     columnLength = indexInfo.columnLength;
     int position = 6 + POINTER_LENGTH;
     for (int i = 0; i < recordCount; i++) {
         string key = "";
-        for (int i = position; i < position + columnLength; i++)
+        for (int i = position; i < position + columnLength; i++) {
             if (buf.bufferBlock[bufferID].values[i] == EMPTY)
                 break;
             else
                 key += buf.bufferBlock[bufferID].values[i];
-
+        }
         position += columnLength;
         int ptrChild = getPtr(position);
         position += POINTER_LENGTH;
@@ -56,21 +52,21 @@ Branch::~Branch() {
     buf.bufferBlock[bufferID].values[1] = '_';
     // RecordNum
     char tmpt[5];
-    // itoa(recordNum, tmpt, 10);
+    // Itoa(recordNum, tmpt, 10);
     sprintf(tmpt, "%d", recordNum);
     string strRecordNum = tmpt;
     while (strRecordNum.length() < 4)
         strRecordNum = '0' + strRecordNum;
     strncpy(buf.bufferBlock[bufferID].values + 2, strRecordNum.c_str(), 4);
 
-    // NodeList
-    if (nodeList.size() == 0) {
+    // IndexList
+    if (indexList.size() == 0) {
         cout << "Undefined action!" << endl;
         exit(0);
     }
 
-    int position = 6 + POINTER_LENGTH;  //ǰ��ļ�λ����洢index�������Ϣ��
-    for (auto i = nodeList.begin(); i != nodeList.end(); i++) {
+    int position = 6 + POINTER_LENGTH;
+    for (auto i = indexList.begin(); i != indexList.end(); i++) {
         string key = i->key;
         while (key.length() < columnLength)
             key += EMPTY;
@@ -79,7 +75,7 @@ Branch::~Branch() {
 
         char tmpt[5];
         sprintf(tmpt, "%d", i->ptrChild);
-        // itoa(i->ptrChild, tmpt, 10);
+
         string ptrChild = tmpt;
         while (ptrChild.length() < POINTER_LENGTH)
             ptrChild = '0' + ptrChild;
@@ -87,39 +83,37 @@ Branch::~Branch() {
         position += POINTER_LENGTH;
     }
 }
-
 void Branch::insert(BranchIndex node) {
     recordNum++;
-    auto i = nodeList.begin();
-    if (nodeList.size() == 0)
-        nodeList.insert(i, node);
+    auto i = indexList.begin();
+    if (indexList.size() == 0)
+        indexList.insert(i, node);
     else {
-        for (i = nodeList.begin(); i != nodeList.end(); i++)
+        for (i = indexList.begin(); i != indexList.end(); i++)
             if (i->key > node.key)
                 break;
-        nodeList.insert(i, node);
+        indexList.insert(i, node);
     }
 }
 
 BranchIndex Branch::pop() {
     recordNum--;
-    BranchIndex tmp = nodeList.back();
-    nodeList.pop_back();
-    return tmp;
+    BranchIndex tmpt = indexList.back();
+    indexList.pop_back();
+    return tmpt;
 }
 
-Leaf::Leaf(int bufID) {  // This kind of leaf is added when old leaf is needed to be splited
-    bufferID  = bufID;
+Leaf::Leaf(int vbufNum) {  // This kind of leaf is added when old leaf is needed to be splited
+    bufferID  = vbufNum;
     recordNum = 0;
     nextSib = prevSib = 0;
 }
-
-Leaf::Leaf(int bufID, const Index &indexInfo) {
-    bufferID        = bufID;
+Leaf::Leaf(int vbufNum, const Index &indexInfo) {
+    bufferID        = vbufNum;
     isRoot          = (buf.bufferBlock[bufferID].values[0] == 'R');
     int recordCount = getRecordNum();
     recordNum       = 0;
-    ptrParent       = getPtr(6);
+    ptrFather       = getPtr(6);
     prevSib         = getPtr(6 + POINTER_LENGTH);
     nextSib         = getPtr(6 + POINTER_LENGTH * 2);
     columnLength    = indexInfo.columnLength;
@@ -134,32 +128,32 @@ Leaf::Leaf(int bufID, const Index &indexInfo) {
                 key += buf.bufferBlock[bufferID].values[i];
         }
         position += columnLength;
-        int offsetFile = getPtr(position);
+        int offsetInFile = getPtr(position);
         position += POINTER_LENGTH;
-        int offsetBlock = getPtr(position);
+        int offsetInBlock = getPtr(position);
         position += POINTER_LENGTH;
-
-        insert(LeafIndex(key, offsetFile, offsetBlock));
+        LeafIndex node(key, offsetInFile, offsetInBlock);
+        insert(node);
     }
 }
-
 Leaf::~Leaf() {
-    if (isRoot)  // Root leaf
+    // IsRoot
+    if (isRoot)
         buf.bufferBlock[bufferID].values[0] = 'R';
-    else  // Non-root leaf
+    else
         buf.bufferBlock[bufferID].values[0] = '_';
+    // IsLeaf
     buf.bufferBlock[bufferID].values[1] = 'L';
     // RecordNum
-    char tmpt[5];  // 4 char wide
+    char tmpt[5];
     sprintf(tmpt, "%d", recordNum);
-    string strRecordNum(tmpt);
+    string strRecordNum = tmpt;
     while (strRecordNum.length() < 4)
         strRecordNum = '0' + strRecordNum;
     int position = 2;
     strncpy(buf.bufferBlock[bufferID].values + position, strRecordNum.c_str(), 4);
     position += 4;
-    sprintf(tmpt, "%d", ptrParent);
-    // itoa(ptrFather, tmpt, 10);
+    sprintf(tmpt, "%d", ptrFather);
     string strptrFather = tmpt;
     while (strptrFather.length() < POINTER_LENGTH)
         strptrFather = '0' + strptrFather;
@@ -167,7 +161,6 @@ Leaf::~Leaf() {
     position += POINTER_LENGTH;
 
     sprintf(tmpt, "%d", prevSib);
-    // itoa(prevSib, tmpt, 10);
     string strLastSibling = tmpt;
     while (strLastSibling.length() < POINTER_LENGTH)
         strLastSibling = '0' + strLastSibling;
@@ -175,64 +168,60 @@ Leaf::~Leaf() {
     position += POINTER_LENGTH;
 
     sprintf(tmpt, "%d", nextSib);
-    // itoa(nextSibling, tmpt, 10);
     string strNextSibling = tmpt;
     while (strNextSibling.length() < POINTER_LENGTH)
         strNextSibling = '0' + strNextSibling;
     strncpy(buf.bufferBlock[bufferID].values + position, strNextSibling.c_str(), POINTER_LENGTH);
     position += POINTER_LENGTH;
 
-    // NodeList
-    if (nodeList.size() == 0) {
+    // IndexList
+    if (indexList.size() == 0) {
         cout << "Undefined action!" << endl;
         exit(0);
     }
 
-    for (auto &i : nodeList) {
+    for (auto &i : indexList) {
         string key = i.key;
         while (key.length() < columnLength)
             key += EMPTY;
         strncpy(buf.bufferBlock[bufferID].values + position, key.c_str(), columnLength);
         position += columnLength;
 
-        sprintf(tmpt, "%d", i.offsetBlock);
-        // itoa(i.offsetFile, tmpt, 10);
-        string offsetFile = tmpt;
-        while (offsetFile.length() < POINTER_LENGTH)
-            offsetFile = '0' + offsetFile;
-        strncpy(buf.bufferBlock[bufferID].values + position, offsetFile.c_str(), POINTER_LENGTH);
+        sprintf(tmpt, "%d", i.offsetInBlock);
+
+        string offsetInFile = tmpt;
+        while (offsetInFile.length() < POINTER_LENGTH)
+            offsetInFile = '0' + offsetInFile;
+        strncpy(buf.bufferBlock[bufferID].values + position, offsetInFile.c_str(), POINTER_LENGTH);
         position += POINTER_LENGTH;
 
-        sprintf(tmpt, "%d", i.offsetBlock);
-        // itoa(i.offsetBlock, tmpt, 10);
-        string offsetBlock = tmpt;
-        while (offsetBlock.length() < POINTER_LENGTH)
-            offsetBlock = '0' + offsetBlock;
-        strncpy(buf.bufferBlock[bufferID].values + position, offsetBlock.c_str(), POINTER_LENGTH);
+        sprintf(tmpt, "%d", i.offsetInBlock);
+
+        string offsetInBlock = tmpt;
+        while (offsetInBlock.length() < POINTER_LENGTH)
+            offsetInBlock = '0' + offsetInBlock;
+        strncpy(buf.bufferBlock[bufferID].values + position, offsetInBlock.c_str(), POINTER_LENGTH);
         position += POINTER_LENGTH;
-        // cout << key<< "\t" <<offsetFile<<"\t"<< offsetFile<< endl;
     }
 }
 
 void Leaf::insert(LeafIndex node) {
     recordNum++;
-    // cout << "onece" << endl;
-    auto i = nodeList.begin();
-    if (nodeList.size() == 0) {
-        nodeList.insert(i, node);
+    auto i = indexList.begin();
+    if (indexList.size() == 0) {
+        indexList.insert(i, node);
         return;
     } else {
-        for (auto &i : nodeList)
-            if (i.key > node.key)
+        for (i = indexList.begin(); i != indexList.end(); i++)
+            if (i->key > node.key)
                 break;
     }
-    nodeList.insert(i, node);
+    indexList.insert(i, node);
 }
-
 LeafIndex Leaf::pop() {
     recordNum--;
-    LeafIndex tmpt = nodeList.back();
-    nodeList.pop_back();
+    LeafIndex tmpt = indexList.back();
+    indexList.pop_back();
     return tmpt;
 }
 
@@ -263,11 +252,11 @@ void IndexManager::createIndex(const Table &tableInfo, Index &indexInfo) {
     const int recordNum = BLOCK_SIZE / length;
 
     // Read datas from the record and sort it into a B+ Tree and store it
-    for (int bOf = 0; bOf < tableInfo.blockID; bOf++) {
-        int bufferID = buf.getIfIsInBuffer(fileName, bOf);
+    for (int blockOffset = 0; blockOffset < tableInfo.blockID; blockOffset++) {
+        int bufferID = buf.getIfIsInBuffer(fileName, blockOffset);
         if (bufferID == -1) {
             bufferID = buf.getEmptyBuffer();
-            buf.readBlock(fileName, bOf, bufferID);
+            buf.readBlock(fileName, blockOffset, bufferID);
         }
         for (int offset = 0; offset < recordNum; offset++) {
             int position = offset * length;
@@ -276,14 +265,14 @@ void IndexManager::createIndex(const Table &tableInfo, Index &indexInfo) {
                 continue;  // Inticate that this row of record have been deleted
             stringrow.erase(stringrow.begin());
             key = getColumnValue(tableInfo, indexInfo, stringrow);
-            LeafIndex node(key, bOf, offset);
+            LeafIndex node(key, blockOffset, offset);
             insertValue(indexInfo, node);
         }
     }
 }
 
 BranchIndex IndexManager::insertValue(Index &indexInfo, LeafIndex node, int blockOffset) {
-    BranchIndex ret;  // For return, intial to be empty
+    BranchIndex reBranch;  // For return, intial to be empty
     string fileName = indexInfo.indexName + ".index";
     int bufferID    = buf.getbufferID(fileName, blockOffset);
     bool isLeaf     = (buf.bufferBlock[bufferID].values[1] == 'L');  // L for leaf
@@ -293,25 +282,25 @@ BranchIndex IndexManager::insertValue(Index &indexInfo, LeafIndex node, int bloc
 
         const int RecordLength = indexInfo.columnLength + POINTER_LENGTH * 2;
         const int MaxrecordNum = (BLOCK_SIZE - 6 - POINTER_LENGTH * 3) / RecordLength;
-        if (leaf.recordNum > MaxrecordNum) {                    // Record number is too great, need to split
-            if (leaf.isRoot) {                                  // This leaf is a root
-                int rootBufID = leaf.bufferID;                  // Buffer number for new root
+        if (leaf.recordNum > MaxrecordNum) {    // Record number is too great, need to split
+            if (leaf.isRoot) {                  // This leaf is a root
+                int rbufferID = leaf.bufferID;  // Buffer number for new root
                 leaf.bufferID = buf.addBlockInFile(indexInfo);  // Find a new place for old leaf
-                int sibBufID  = buf.addBlockInFile(indexInfo);  // Buffer number for sibling
-                Branch branchRoot(rootBufID);                   // New root, which is branch indeed
-                Leaf leafadd(sibBufID);                         // Sibling
+                int sbufferID = buf.addBlockInFile(indexInfo);  // Buffer number for sibling
+                Branch branchRoot(rbufferID);                   // New root, which is branch indeed
+                Leaf leafadd(sbufferID);                        // Sibling
 
                 // Is root
                 branchRoot.isRoot = 1;
                 leafadd.isRoot    = 0;
                 leaf.isRoot       = 0;
 
-                branchRoot.ptrParent = leafadd.ptrParent = leaf.ptrParent = 0;
+                branchRoot.ptrFather = leafadd.ptrFather = leaf.ptrFather = 0;
                 branchRoot.columnLength = leafadd.columnLength = leaf.columnLength;
                 // Link the newly added leaf block in the link list of leaf
                 leafadd.prevSib = buf.bufferBlock[leaf.bufferID].blockOffset;
                 leaf.nextSib    = buf.bufferBlock[leafadd.bufferID].blockOffset;
-                while (leafadd.nodeList.size() < leaf.nodeList.size()) {
+                while (leafadd.indexList.size() < leaf.indexList.size()) {
                     LeafIndex tnode = leaf.pop();
                     leafadd.insert(tnode);
                 }
@@ -323,12 +312,12 @@ BranchIndex IndexManager::insertValue(Index &indexInfo, LeafIndex node, int bloc
                 tmptNode.key      = leaf.getFront().key;
                 tmptNode.ptrChild = buf.bufferBlock[leaf.bufferID].blockOffset;
                 branchRoot.insert(tmptNode);
-                return ret;
+                return reBranch;
             } else {  // This leaf is not a root, we have to cascade up
                 int bufferID = buf.addBlockInFile(indexInfo);
                 Leaf leafadd(bufferID);
                 leafadd.isRoot       = 0;
-                leafadd.ptrParent    = leaf.ptrParent;
+                leafadd.ptrFather    = leaf.ptrFather;
                 leafadd.columnLength = leaf.columnLength;
 
                 // Link the newly added leaf block in the link list of leaf
@@ -340,24 +329,25 @@ BranchIndex IndexManager::insertValue(Index &indexInfo, LeafIndex node, int bloc
                     Leaf leafnext(bufferID, indexInfo);
                     leafnext.prevSib = buf.bufferBlock[leafadd.bufferID].blockOffset;
                 }
-                while (leafadd.nodeList.size() < leaf.nodeList.size()) {
+                while (leafadd.indexList.size() < leaf.indexList.size()) {
                     LeafIndex tnode = leaf.pop();
                     leafadd.insert(tnode);
                 }
-                ret.key      = leafadd.getFront().key;
-                ret.ptrChild = leaf.nextSib;
-                return ret;
+                reBranch.key      = leafadd.getFront().key;
+                reBranch.ptrChild = leaf.nextSib;
+                return reBranch;
             }
-        } else  // Not need to split,just return
-            return ret;
+        } else {  // Not need to split,just return
+            return reBranch;
+        }
 
     } else {  // Not a leaf
         Branch branch(bufferID, indexInfo);
-        auto i = branch.nodeList.begin();
+        auto i = branch.indexList.begin();
         if (i->key > node.key) {
             i->key = node.key;
         } else {
-            for (i = branch.nodeList.begin(); i != branch.nodeList.end(); i++)
+            for (i = branch.indexList.begin(); i != branch.indexList.end(); i++)
                 if (i->key > node.key)
                     break;
             i--;
@@ -365,28 +355,29 @@ BranchIndex IndexManager::insertValue(Index &indexInfo, LeafIndex node, int bloc
         BranchIndex bnode = insertValue(indexInfo, node, i->ptrChild);  // Go down
 
         if (bnode.key == "") {
-            return ret;
+            return reBranch;
         } else {  // Bnode.key != "",need to split up
             branch.insert(bnode);
             const int RecordLength = indexInfo.columnLength + POINTER_LENGTH;
             const int MaxrecordNum = (BLOCK_SIZE - 6 - POINTER_LENGTH) / RecordLength;
             if (branch.recordNum > MaxrecordNum) {  // Need to split up
                 if (branch.isRoot) {
-                    int rbufferID   = branch.bufferID;                // Buffer number for new root
-                    branch.bufferID = buf.addBlockInFile(indexInfo);  // Find a new place for old branch
-                    int sbufferID   = buf.addBlockInFile(indexInfo);  // Buffer number for sibling
-                    Branch branchRoot(rbufferID);                     // New root
-                    Branch branchadd(sbufferID);                      // Sibling
+                    int rbufferID = branch.bufferID;  // Buffer number for new root
+                    branch.bufferID =
+                        buf.addBlockInFile(indexInfo);  // Find a new place for old branch
+                    int sbufferID = buf.addBlockInFile(indexInfo);  // Buffer number for sibling
+                    Branch branchRoot(rbufferID);                   // New root
+                    Branch branchadd(sbufferID);                    // Sibling
 
                     // Is root
                     branchRoot.isRoot = 1;
                     branchadd.isRoot  = 0;
                     branch.isRoot     = 0;
 
-                    branchRoot.ptrParent = branchadd.ptrParent = branch.ptrParent = 0;
+                    branchRoot.ptrFather = branchadd.ptrFather = branch.ptrFather = 0;
                     branchRoot.columnLength = branchadd.columnLength = branch.columnLength;
 
-                    while (branchadd.nodeList.size() < branch.nodeList.size()) {
+                    while (branchadd.indexList.size() < branch.indexList.size()) {
                         BranchIndex tnode = branch.pop();
                         branchadd.insert(tnode);
                     }
@@ -398,28 +389,28 @@ BranchIndex IndexManager::insertValue(Index &indexInfo, LeafIndex node, int bloc
                     tmptNode.key      = branch.getFront().key;
                     tmptNode.ptrChild = buf.bufferBlock[branch.bufferID].blockOffset;
                     branchRoot.insert(tmptNode);
-                    return ret;  // Here the function must have already returned to the top lay
-                } else {         // Branch is not a root
+                    return reBranch;  // Here the function must have already returned to the top lay
+                } else {              // Branch is not a root
                     int bufferID = buf.addBlockInFile(indexInfo);
                     Branch branchadd(bufferID);
                     branchadd.isRoot       = 0;
-                    branchadd.ptrParent    = branch.ptrParent;
+                    branchadd.ptrFather    = branch.ptrFather;
                     branchadd.columnLength = branch.columnLength;
 
-                    while (branchadd.nodeList.size() < branch.nodeList.size()) {
+                    while (branchadd.indexList.size() < branch.indexList.size()) {
                         BranchIndex tnode = branch.pop();
                         branchadd.insert(tnode);
                     }
-                    ret.key      = branchadd.getFront().key;
-                    ret.ptrChild = buf.bufferBlock[bufferID].blockOffset;
-                    return ret;
+                    reBranch.key      = branchadd.getFront().key;
+                    reBranch.ptrChild = buf.bufferBlock[bufferID].blockOffset;
+                    return reBranch;
                 }
             } else {  // Not need to split,just return
-                return ret;
+                return reBranch;
             }
         }
     }
-    return ret;  // Here is just for safe
+    return reBranch;  // Here is just for safe
 }
 
 Data IndexManager::selectEqual(const Table &tableInfo, const Index &indexInfo, string key,
@@ -430,14 +421,14 @@ Data IndexManager::selectEqual(const Table &tableInfo, const Index &indexInfo, s
     bool isLeaf     = (buf.bufferBlock[bufferID].values[1] == 'L');  // L for leaf
     if (isLeaf) {
         Leaf leaf(bufferID, indexInfo);
-        auto i = leaf.nodeList.begin();
-        for (i = leaf.nodeList.begin(); i != leaf.nodeList.end(); i++)
+        auto i = leaf.indexList.begin();
+        for (i = leaf.indexList.begin(); i != leaf.indexList.end(); i++)
             if (i->key == key) {
                 fileName            = indexInfo.table_name + ".table";
-                int recordBufferNum = buf.getbufferID(fileName, i->offsetFile);
-                int position        = (tableInfo.totalLength + 1) * (i->offsetBlock);
-                string stringrow =
-                    buf.bufferBlock[recordBufferNum].getvalues(position, position + tableInfo.totalLength);
+                int recordBufferNum = buf.getbufferID(fileName, i->offsetInFile);
+                int position        = (tableInfo.totalLength + 1) * (i->offsetInBlock);
+                string stringrow    = buf.bufferBlock[recordBufferNum].getvalues(
+                    position, position + tableInfo.totalLength);
                 if (stringrow.c_str()[0] != EMPTY) {
                     stringrow.erase(stringrow.begin());
                     Row splitedRow = splitRow(tableInfo, stringrow);
@@ -447,14 +438,14 @@ Data IndexManager::selectEqual(const Table &tableInfo, const Index &indexInfo, s
             }
     } else {  // It is not a leaf
         Branch branch(bufferID, indexInfo);
-        auto i = branch.nodeList.begin();
-        for (i = branch.nodeList.begin(); i != branch.nodeList.end(); i++) {
+        auto i = branch.indexList.begin();
+        for (i = branch.indexList.begin(); i != branch.indexList.end(); i++) {
             if (i->key > key) {
                 i--;
                 break;
             }
         }
-        if (i == branch.nodeList.end())
+        if (i == branch.indexList.end())
             i--;
         datas = selectEqual(tableInfo, indexInfo, key, i->ptrChild);
     }
@@ -468,18 +459,19 @@ Data IndexManager::selectBetween(
     int bufferID    = buf.getbufferID(fileName, blockOffset);
     bool isLeaf     = (buf.bufferBlock[bufferID].values[1] == 'L');  // L for leaf
     if (isLeaf) {
-        for (;;) {
+        do {
             Leaf leaf(bufferID, indexInfo);
-            for (auto i = leaf.nodeList.begin(); i != leaf.nodeList.end(); i++) {
-                if (i->key >= keyFrom) {
-                    if (i->key > keyTo) {
+
+            for (auto &i : leaf.indexList) {
+                if (i.key >= keyFrom) {
+                    if (i.key > keyTo) {
                         return datas;
                     }
                     fileName            = indexInfo.table_name + ".table";
-                    int recordBufferNum = buf.getbufferID(fileName, i->offsetFile);
-                    int position        = (tableInfo.totalLength + 1) * (i->offsetBlock);
-                    string stringrow =
-                        buf.bufferBlock[recordBufferNum].getvalues(position, position + tableInfo.totalLength);
+                    int recordBufferNum = buf.getbufferID(fileName, i.offsetInFile);
+                    int position        = (tableInfo.totalLength + 1) * (i.offsetInBlock);
+                    string stringrow    = buf.bufferBlock[recordBufferNum].getvalues(
+                        position, position + tableInfo.totalLength);
                     if (stringrow.c_str()[0] != EMPTY) {
                         stringrow.erase(stringrow.begin());
                         Row splitedRow = splitRow(tableInfo, stringrow);
@@ -492,20 +484,20 @@ Data IndexManager::selectBetween(
                 bufferID = buf.getbufferID(fileName, leaf.nextSib);
             } else
                 return datas;
-        }
+        } while (1);
     } else {  // Not leaf, go down to the leaf
         Branch branch(bufferID, indexInfo);
-        auto i = branch.nodeList.begin();
+        auto i = branch.indexList.begin();
         if (i->key > keyFrom) {
             datas = selectBetween(tableInfo, indexInfo, keyFrom, keyTo, i->ptrChild);
             return datas;
         } else {
-            for (i = branch.nodeList.begin(); i != branch.nodeList.end(); i++) {
+            for (i = branch.indexList.begin(); i != branch.indexList.end(); i++)
                 if (i->key > keyFrom) {
                     i--;  //�õ�(*i) ��ߵ�ָ���λ��
                     break;
                 }
-            }
+
             datas = selectBetween(tableInfo, indexInfo, keyFrom, keyTo, i->ptrChild);
             return datas;
         }

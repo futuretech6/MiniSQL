@@ -1,7 +1,8 @@
 #include "BufferManager.h"
 
 BufferManager::BufferManager() {
-    bufferBlock.resize(MAX_BLOCK_NUMBER, buffer());
+    for (int i = 0; i < MAX_BLOCK_NUMBER; i++)
+        bufferBlock[i].initialize();
 }
 
 BufferManager::~BufferManager() {
@@ -63,8 +64,8 @@ void BufferManager::writeBlock(int bufferID) {
 void BufferManager::useBlock(int bufferID) {  // This LRU algorithm is quite expensive
     for (int i = 1; i < MAX_BLOCK_NUMBER; i++) {
         if (i == bufferID) {
-            bufferBlock[i].LRUvalue = 0;
-            bufferBlock[i].isValid  = 1;
+            bufferBlock[bufferID].LRUvalue = 0;
+            bufferBlock[i].isValid         = 1;
         } else
             bufferBlock[bufferID].LRUvalue++;  // The greater is LRUvalue, the less useful the block is
     }
@@ -94,7 +95,8 @@ int BufferManager::getEmptyBuffer() {
 /**
  * @funct: Get a empty or LRU buffer except the ones in fileName
  */
-int BufferManager::getEmptyBufferExcept(string fileName) {  // Except buffer with `fileName`
+int BufferManager::getEmptyBufferExcept(
+    string fileName) {  // Buffer with the destine fileName is not suppose to be flashback
     int bufferID        = -1;
     int highestLRUvalue = bufferBlock[0].LRUvalue;
     for (int i = 0; i < MAX_BLOCK_NUMBER; i++) {
@@ -145,7 +147,7 @@ insertPos BufferManager::getInsertPosition(
             return iPos;
         }
     }
-    // If the program reaches here, the last block is full, therefor one more block is added
+    // If the program run till here, the last block is full, therefor one more block is added
     iPos.bufferID = addBlockInFile(tableInfo);
     iPos.position = 0;
     return iPos;

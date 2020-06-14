@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <list>
@@ -24,7 +25,7 @@ const int NOT_PRIMARY_KEY = 0;
 const int IS_UNIQUE       = 1;
 const int NOT_UNIQUE      = 2;
 
-const int MAX_BLOCK_NUMBER = 1000;  // Should be 10000
+const int MAX_BLOCK_NUMBER = 10000;  // Should be 10000
 const int BLOCK_SIZE       = 4096;
 const char EMPTY           = '@';
 const char END             = '@';
@@ -100,11 +101,11 @@ class Table {
 
 class Index {
   public:
-    string indexName;   // All the datas is store in file index_name.index
+    string indexName;   // All the datas is store in file indexName.index
     string table_name;  // The name of the table on which the index is create
     int column;         // On which column the index is created
     int columnLength;
-    int blockID;  // Number of block the datas of the index occupied in the file index_name.table
+    int blockID;  // Number of block the datas of the index occupied in the file indexName.table
     Index() : column(0), blockID(0) {}
 };
 
