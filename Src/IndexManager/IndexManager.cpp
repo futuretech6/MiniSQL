@@ -21,8 +21,8 @@ Branch::Branch(int vbufNum, const Index &indexInfo) {
     bufferID        = vbufNum;
     isRoot          = (buf.bufferBlock[bufferID].values[0] == 'R');
     int recordCount = getRecordNum();
-    recordNum = 0;  // RecordNum will increase when function insert is called, and finally as large
-                    // As recordCount
+    recordNum       = 0;  // RecordNum will increase when function insert is called, and finally as large
+                          // As recordCount
     ptrFather    = getPtr(6);
     columnLength = indexInfo.columnLength;
     int position = 6 + POINTER_LENGTH;
@@ -241,7 +241,7 @@ void IndexManager::createIndex(const Table &tableInfo, Index &indexInfo) {
     memset(buf.bufferBlock[blockID].values + 2, '0', 4);
     for (int i = 0; i < 3; i++) {
         memset(buf.bufferBlock[blockID].values + 6 + POINTER_LENGTH * i, '0', POINTER_LENGTH);
-        indexInfo.blockID++;
+        indexInfo.blockNum++;
     }
     // Retrieve datas of the table and form a B+ Tree
     fileName = tableInfo.name + ".table";
@@ -252,7 +252,7 @@ void IndexManager::createIndex(const Table &tableInfo, Index &indexInfo) {
     const int recordNum = BLOCK_SIZE / length;
 
     // Read datas from the record and sort it into a B+ Tree and store it
-    for (int blockOffset = 0; blockOffset < tableInfo.blockID; blockOffset++) {
+    for (int blockOffset = 0; blockOffset < tableInfo.blockNum; blockOffset++) {
         int bufferID = buf.getIfIsInBuffer(fileName, blockOffset);
         if (bufferID == -1) {
             bufferID = buf.getEmptyBuffer();
@@ -282,9 +282,9 @@ BranchIndex IndexManager::insertValue(Index &indexInfo, LeafIndex node, int bloc
 
         const int RecordLength = indexInfo.columnLength + POINTER_LENGTH * 2;
         const int MaxrecordNum = (BLOCK_SIZE - 6 - POINTER_LENGTH * 3) / RecordLength;
-        if (leaf.recordNum > MaxrecordNum) {    // Record number is too great, need to split
-            if (leaf.isRoot) {                  // This leaf is a root
-                int rbufferID = leaf.bufferID;  // Buffer number for new root
+        if (leaf.recordNum > MaxrecordNum) {                    // Record number is too great, need to split
+            if (leaf.isRoot) {                                  // This leaf is a root
+                int rbufferID = leaf.bufferID;                  // Buffer number for new root
                 leaf.bufferID = buf.addBlockInFile(indexInfo);  // Find a new place for old leaf
                 int sbufferID = buf.addBlockInFile(indexInfo);  // Buffer number for sibling
                 Branch branchRoot(rbufferID);                   // New root, which is branch indeed
@@ -362,12 +362,11 @@ BranchIndex IndexManager::insertValue(Index &indexInfo, LeafIndex node, int bloc
             const int MaxrecordNum = (BLOCK_SIZE - 6 - POINTER_LENGTH) / RecordLength;
             if (branch.recordNum > MaxrecordNum) {  // Need to split up
                 if (branch.isRoot) {
-                    int rbufferID = branch.bufferID;  // Buffer number for new root
-                    branch.bufferID =
-                        buf.addBlockInFile(indexInfo);  // Find a new place for old branch
-                    int sbufferID = buf.addBlockInFile(indexInfo);  // Buffer number for sibling
-                    Branch branchRoot(rbufferID);                   // New root
-                    Branch branchadd(sbufferID);                    // Sibling
+                    int rbufferID   = branch.bufferID;                // Buffer number for new root
+                    branch.bufferID = buf.addBlockInFile(indexInfo);  // Find a new place for old branch
+                    int sbufferID   = buf.addBlockInFile(indexInfo);  // Buffer number for sibling
+                    Branch branchRoot(rbufferID);                     // New root
+                    Branch branchadd(sbufferID);                      // Sibling
 
                     // Is root
                     branchRoot.isRoot = 1;
@@ -424,11 +423,11 @@ Data IndexManager::selectEqual(const Table &tableInfo, const Index &indexInfo, s
         auto i = leaf.indexList.begin();
         for (i = leaf.indexList.begin(); i != leaf.indexList.end(); i++)
             if (i->key == key) {
-                fileName            = indexInfo.table_name + ".table";
+                fileName            = indexInfo.tableName + ".table";
                 int recordBufferNum = buf.getbufferID(fileName, i->offsetInFile);
                 int position        = (tableInfo.totalLength + 1) * (i->offsetInBlock);
-                string stringrow    = buf.bufferBlock[recordBufferNum].getvalues(
-                    position, position + tableInfo.totalLength);
+                string stringrow =
+                    buf.bufferBlock[recordBufferNum].getvalues(position, position + tableInfo.totalLength);
                 if (stringrow.c_str()[0] != EMPTY) {
                     stringrow.erase(stringrow.begin());
                     Row splitedRow = splitRow(tableInfo, stringrow);
@@ -467,11 +466,11 @@ Data IndexManager::selectBetween(
                     if (i.key > keyTo) {
                         return datas;
                     }
-                    fileName            = indexInfo.table_name + ".table";
+                    fileName            = indexInfo.tableName + ".table";
                     int recordBufferNum = buf.getbufferID(fileName, i.offsetInFile);
                     int position        = (tableInfo.totalLength + 1) * (i.offsetInBlock);
-                    string stringrow    = buf.bufferBlock[recordBufferNum].getvalues(
-                        position, position + tableInfo.totalLength);
+                    string stringrow =
+                        buf.bufferBlock[recordBufferNum].getvalues(position, position + tableInfo.totalLength);
                     if (stringrow.c_str()[0] != EMPTY) {
                         stringrow.erase(stringrow.begin());
                         Row splitedRow = splitRow(tableInfo, stringrow);

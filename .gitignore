@@ -8,3 +8,4 @@ bin
 MiniSQL
 *.table
 *.index
+*.zip

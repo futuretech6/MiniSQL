@@ -124,14 +124,14 @@ int BufferManager::getEmptyBufferExcept(
 insertPos BufferManager::getInsertPosition(
     Table &tableInfo) {  // To increase efficiency, we always insert values from the back of the file
     insertPos iPos;
-    if (tableInfo.blockID == 0) {  // The *.table file is empty and the data is firstly inserted
+    if (tableInfo.blockNum == 0) {  // The *.table file is empty and the data is firstly inserted
         iPos.bufferID = addBlockInFile(tableInfo);
         iPos.position = 0;
         return iPos;
     }
     string fileName = tableInfo.name + ".table";
     int length      = tableInfo.totalLength + 1;
-    int blockOffset = tableInfo.blockID - 1;  // Get the block offset in file of the last block
+    int blockOffset = tableInfo.blockNum - 1;  // Get the block offset in file of the last block
     int bufferID    = getIfIsInBuffer(fileName, blockOffset);
     if (bufferID == -1) {  // Indicate that the data is not read in buffer yet
         bufferID = getEmptyBuffer();
@@ -163,7 +163,7 @@ int BufferManager::addBlockInFile(Table &tableInfo) {  // Add one more block in 
     bufferBlock[bufferID].isValid     = 1;
     bufferBlock[bufferID].isWritten   = 1;
     bufferBlock[bufferID].fileName    = tableInfo.name + ".table";
-    bufferBlock[bufferID].blockOffset = tableInfo.blockID++;
+    bufferBlock[bufferID].blockOffset = tableInfo.blockNum++;
     return bufferID;
 }
 
@@ -178,7 +178,7 @@ int BufferManager::addBlockInFile(Index &indexInfo) {  // Add one more block in 
     bufferBlock[bufferID].isValid     = 1;
     bufferBlock[bufferID].isWritten   = 1;
     bufferBlock[bufferID].fileName    = fileName;
-    bufferBlock[bufferID].blockOffset = indexInfo.blockID++;
+    bufferBlock[bufferID].blockOffset = indexInfo.blockNum++;
     return bufferID;
 }
 

@@ -23,11 +23,10 @@ class BufferManager {
     int getEmptyBuffer();                                      // Get a empty or LRU buffer
     int getEmptyBufferExcept(string fileName);                 // Except the ones in fileName
     insertPos getInsertPosition(Table &tableInfo);
-    int addBlockInFile(Table &tableInfo);  // Add one more block in file for the table
-    int addBlockInFile(Index &indexInfo);  // Add one more block in file for the index
-    int getIfIsInBuffer(
-        string fileName, int blockOffset);  // Get bufferID if it's inside given location
-    void setInvalid(string fileName);       // Invalidate pertaining buffer
+    int addBlockInFile(Table &tableInfo);                   // Add one more block in file for the table
+    int addBlockInFile(Index &indexInfo);                   // Add one more block in file for the index
+    int getIfIsInBuffer(string fileName, int blockOffset);  // Get bufferID if it's inside given location
+    void setInvalid(string fileName);                       // Invalidate pertaining buffer
 };
 
 #endif

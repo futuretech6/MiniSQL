@@ -15,7 +15,7 @@ endforeach()
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-add_executable(MiniSQL ./main.cpp)
+add_executable(MiniSQL ./MiniSQL.cpp)
 
 foreach(modName IN LISTS MOD_LIST)
     target_link_libraries(MiniSQL ${modName})
