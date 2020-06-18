@@ -1,0 +1,27 @@
+create table People(Name char(256), ID int unique, Age int, Score float, primary key(Name));
+create table People(Name char(20), ID int unique, Age int, Score float, primary key(Name));
+
+INSERT into People values('AaA', 0, 19, 11.2);
+insert into People VALUES('BbB', 1, 20, 33.4);
+insert into People values('CcC', 2, 20, 55.6);
+insert into People values('DdD', 3, 98, 66.7);
+insert into People values('EeE', 4, 99, 77.8);
+
+INSERT into People values('AaA', 99, 19, 11.2);
+insert into People VALUES('XXX', 1, 20, 33.4);
+
+create index index_Name on People(Name);
+create index index_ID on People(ID);
+create index index_Age on People(Age);
+
+select * from People;
+SELECT Name, ID FROM People WHERE Age = 20 AND Name <> 'BbB';
+select Name from People where ID > 3 or Age <= 30;
+
+delete from People where ID >= 2 and ID < 4;
+
+select * from People;
+
+drop index index_Name;
+
+quit;

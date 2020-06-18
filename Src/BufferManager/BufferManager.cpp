@@ -17,7 +17,7 @@ void BufferManager::flashBack(int bufferID) {
     if (!bufferBlock[bufferID].isWritten)
         return;
     string fileName = bufferBlock[bufferID].fileName;
-    fstream fout(fileName.c_str(), ios::in | ios::out);
+    fstream fout(CACHE_FOLDER + fileName, ios::in | ios::out);
     fout.seekp(BLOCK_SIZE * bufferBlock[bufferID].blockOffset, fout.beg);
     fout.write(bufferBlock[bufferID].values, BLOCK_SIZE);
     bufferBlock[bufferID].initialize();
@@ -44,7 +44,7 @@ void BufferManager::readBlock(string fileName, int blockOffset, int bufferID) {
     bufferBlock[bufferID].isWritten   = 0;
     bufferBlock[bufferID].fileName    = fileName;
     bufferBlock[bufferID].blockOffset = blockOffset;
-    fstream fin(fileName.c_str(), ios::in);
+    fstream fin(CACHE_FOLDER + fileName, ios::in);
     fin.seekp(BLOCK_SIZE * blockOffset, fin.beg);
     fin.read(bufferBlock[bufferID].values, BLOCK_SIZE);
     fin.close();
@@ -187,9 +187,10 @@ int BufferManager::addBlockInFile(Index &indexInfo) {  // Add one more block in 
  * @ret: If not inside, return -1, otherwise return bufferID
  */
 int BufferManager::getIfIsInBuffer(string fileName, int blockOffset) {
-    for (int bufferID = 0; bufferID < MAX_BLOCK_NUMBER; bufferID++)
+    for (int bufferID = 0; bufferID < MAX_BLOCK_NUMBER; bufferID++) {
         if (bufferBlock[bufferID].fileName == fileName && bufferBlock[bufferID].blockOffset == blockOffset)
             return bufferID;
+    }
     return -1;  // Indicate that the data is not read in buffer yet
 }
 

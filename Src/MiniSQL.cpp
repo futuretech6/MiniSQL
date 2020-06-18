@@ -4,8 +4,8 @@
 #include "IndexManager.h"
 #include "Interpreter.h"
 #include "RecordManager.h"
-
 #include <iostream>
+
 using namespace std;
 
 int IsComEnd(char *input);
@@ -250,6 +250,10 @@ void executeCommand(void) {
             } else
                 record.selectRecords(inter.tableInfor, tmpData, inter.condition);
             printResults(tmpData, inter.tableInfor, inter.attributes);
+            if (tmpData.rowList.size() == 1)
+                cout << "1 row in set " << endl;
+            else
+                cout << tmpData.rowList.size() << " rows in set " << endl;
             break;
         case DELETE_NOWHERE_CLAUSE:
             count = record.deleteRecords(inter.tableInfor);
@@ -311,11 +315,34 @@ void executeCommand(void) {
     }
 }
 
+static int getUtf8LetterNumber(string &raw_s) {
+    const char *s = raw_s.c_str();
+    int i = 0, j = 0;
+    while (s[i]) {
+        if ((s[i] & 0xc0) != 0x80)
+            j++;
+        i++;
+    }
+    return j;
+}
+
+int getLength(string &input) {
+    int len_char = getUtf8LetterNumber(input);  //字符数
+    int len_byte = input.length();              //字节数
+    if (len_char == len_byte)
+        return len_byte;
+    else if (len_char == 2 * len_byte) {
+        return (UTF8_WIDTH - 1) * (double)len_byte;
+    } else {
+        return (UTF8_WIDTH - 1) * (double)len_byte;
+    }
+}
+
 void printResults(Data &data, Table &tableInfor, vector<Attribute> &columnSelected) {
     if (columnSelected[0].name == "*")  // select *
     {
         /*构建表头*/
-        cout << "+";
+        cout << "\n+";
         for (int i = 0; i < tableInfor.attriNum; i++) {
             string tmp = "";
             for (int j = 0; j <= tableInfor.attributes[i].length; j++) {
@@ -326,8 +353,9 @@ void printResults(Data &data, Table &tableInfor, vector<Attribute> &columnSelect
         cout << endl << "|";
         for (int i = 0; i < tableInfor.attriNum; i++) {
             cout << " " << tableInfor.attributes[i].name;
-            string tmp = "";
-            for (int j = 0; j < tableInfor.attributes[i].length - tableInfor.attributes[i].name.length(); j++)
+            string tmp    = "";
+            string ttmmpp = tableInfor.attributes[i].name;
+            for (int j = 0; j < tableInfor.attributes[i].length - getLength(ttmmpp); j++)
             // 最大长度减去已显示的长度，保证对齐
             {
                 tmp += " ";
@@ -351,7 +379,7 @@ void printResults(Data &data, Table &tableInfor, vector<Attribute> &columnSelect
                 cout << out;
                 string tmp     = "";
                 int lengthLeft = tableInfor.attributes[j].length - out.length();
-                for (int k = 0; k < lengthLeft; k++)
+                for (int k = 0; k < lengthLeft + out.length() - getLength(out); k++)
                     tmp += " ";
                 cout << tmp << "| ";
             }
@@ -374,7 +402,7 @@ void printResults(Data &data, Table &tableInfor, vector<Attribute> &columnSelect
             columnNumList.push_back(getColumnID(tableInfor, columnSelected[i].name));
         }
         // 显示表头
-        cout << "+";
+        cout << "\n+";
         for (int i = 0; i < columnNumList.size(); i++) {
             string tmp = "";
             for (int j = 0; j < tableInfor.attributes[i].length + 1; j++) {
@@ -388,7 +416,8 @@ void printResults(Data &data, Table &tableInfor, vector<Attribute> &columnSelect
             string tmp = "";
             int lengthLeft =
                 tableInfor.attributes[columnNumList[i]].length - tableInfor.attributes[columnNumList[i]].name.length();
-            for (int j = 0; j < lengthLeft; j++) {
+            string ttmmpp = tableInfor.attributes[columnNumList[i]].name;
+            for (int j = 0; j < lengthLeft + ttmmpp.length() - getLength(ttmmpp); j++) {
                 tmp += " ";
             }
             cout << tmp << "|";
@@ -410,10 +439,10 @@ void printResults(Data &data, Table &tableInfor, vector<Attribute> &columnSelect
                 cout << out;
                 int lengthLeft = tableInfor.attributes[j].length - out.length();
                 string tmp     = "";
-                for (int k = 0; k < lengthLeft; k++) {
+                for (int k = 0; k < lengthLeft + out.length() - getLength(out); k++) {
                     tmp += " ";
                 }
-                cout << tmp << "|";
+                cout << tmp << "| ";
             }
             cout << endl /*<< "|"*/;
         }

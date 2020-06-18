@@ -1,9 +1,0 @@
-create table People(Name char(20), Age int);
-insert into People values("AAA", 19);
-insert into People values("BBB", 20);
-insert into People values("CCC", 21);
-insert into People values("DDD", 98);
-insert into People values("EEE", 99);
-select * from People;
-select * from People where Name = "BBB";
-select Name from People where Age >= 21 and Age < 99;

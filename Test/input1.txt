@@ -1,0 +1,9 @@
+select * from People;
+
+drop table People;
+
+execfile ./Test/exec.txt;
+
+select * from 身份;
+
+quit;

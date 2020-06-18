@@ -233,7 +233,7 @@ int RecordManager::deleteRecords(const Table &tableInfor, const Condition &condi
 
 void RecordManager::dropTable(Table &tableInfor) {
     string fileName = tableInfor.name + ".table";
-    if (remove(fileName.c_str()) != 0) {
+    if (remove((CACHE_FOLDER + fileName).c_str()) != 0) {
         perror("Drop table wrong in record manager!\n");
     } else {
         buf.setInvalid(fileName);
@@ -242,6 +242,6 @@ void RecordManager::dropTable(Table &tableInfor) {
 
 void RecordManager::createTable(Table &tableInfor) {
     string fileName = tableInfor.name + ".table";
-    fstream fout(fileName.c_str(), ios::out);  //���������Դ�ļ���
+    fstream fout(CACHE_FOLDER + fileName, ios::out);  //���������Դ�ļ���
     fout.close();
 }

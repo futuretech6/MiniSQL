@@ -1,0 +1,84 @@
+
+		***********************************************
+		             欢迎使用 MiniSQL !
+		               Version (1.0)  
+		            
+		        Copyright(2020) all right reserved !
+		***********************************************
+
+
+>>> ERROR when execute SQL : create table People(Name char(256), ID int unique, Age int, Score float, primary key(Name))
+TyprError: Data type char is out of bound
+>>> Query OK, 0 row affected 
+Table 'People' is created successfully 
+>>> Query OK, 1 row affected 
+Table 'People' is updated successfully 
+>>> Query OK, 1 row affected 
+Table 'People' is updated successfully 
+>>> Query OK, 1 row affected 
+Table 'People' is updated successfully 
+>>> Query OK, 1 row affected 
+Table 'People' is updated successfully 
+>>> Query OK, 1 row affected 
+Table 'People' is updated successfully 
+>>> ERROR when execute SQL :  INSERT into People values('AaA', 99, 19, 11.2)
+Error: Column 'Name' is duplicated
+>>> ERROR when execute SQL : insert into People VALUES('XXX', 1, 20, 33.4)
+Error: Column 'ID' is duplicated
+>>> RecordNum: 0
+RecordNum: 1
+RecordNum: 2
+RecordNum: 3
+RecordNum: 4
+Query OK, 0 row affected 
+Index 'index_Name' is created successfully 
+>>> RecordNum: 0
+RecordNum: 1
+RecordNum: 2
+RecordNum: 3
+RecordNum: 4
+Query OK, 0 row affected 
+Index 'index_ID' is created successfully 
+>>> ERROR when execute SQL : create index index_Age on People(Age)
+Error: Column 'Age' is not unique
+>>> 
++----------------------+------------+------------+-----------+
+| Name                 | ID         | Age        | Score     |
++----------------------+------------+------------+-----------+
+| AaA                  | 0          | 19         | 11.2      | 
+| BbB                  | 1          | 20         | 33.4      | 
+| CcC                  | 2          | 20         | 55.6      | 
+| DdD                  | 3          | 98         | 66.7      | 
+| EeE                  | 4          | 99         | 77.8      | 
++----------------------+------------+------------+-----------+
+5 rows in set 
+>>> 
++----------------------+------------+
+| Name                 | ID         |
++----------------------+------------+
+| CcC                  | 2          | 
++----------------------+------------+
+1 row in set 
+>>> 
++----------------------+
+| Name                 |
++----------------------+
+| AaA                  | 
+| BbB                  | 
+| CcC                  | 
+| EeE                  | 
++----------------------+
+4 rows in set 
+>>> Query OK, 2 rows affected
+Table 'People' is updated successfully 
+>>> 
++----------------------+------------+------------+-----------+
+| Name                 | ID         | Age        | Score     |
++----------------------+------------+------------+-----------+
+| AaA                  | 0          | 19         | 11.2      | 
+| BbB                  | 1          | 20         | 33.4      | 
+| EeE                  | 4          | 99         | 77.8      | 
++----------------------+------------+------------+-----------+
+3 rows in set 
+>>> Query OK, index 'index_Name' is dropped successfully 
+>>> Press any key to quit.

@@ -127,20 +127,20 @@ void Interpreter::parseCommand(string &command) {
     if (!flag) {
         op = EMPTY_COMMAND;
         return;
-    } else if (!strcmp(firstWord.c_str(), ";")) {
+    } else if ((firstWord == ";")) {
         op = EMPTY_COMMAND;
         return;
-    } else if (!strcmp(firstWord.c_str(), "quit") || !strcmp(firstWord.c_str(), "QUIT")) {
+    } else if ((firstWord == "quit") || (firstWord == "QUIT")) {
         op = QUIT;
         return;
     }
 
-    else if (!strcmp(firstWord.c_str(), "select") || !strcmp(firstWord.c_str(), "SELECT")) {
+    else if ((firstWord == "select") || (firstWord == "SELECT")) {
         op = SELECT_ERROR;
         //���û�ܵõ���һ�����ʻ�����һ�������Ƿֺţ�op���ش���
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
 
         Attribute tmpAttr;
@@ -149,28 +149,28 @@ void Interpreter::parseCommand(string &command) {
 
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         //��select�������
-        while (!strcmp(firstWord.c_str(), ",")) {
+        while ((firstWord == ",")) {
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             tmpAttr.name = firstWord;
             attributes.push_back(tmpAttr);
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
         }
         //�����һ������word����from��op���ش���
-        if (strcmp(firstWord.c_str(), "from") && strcmp(firstWord.c_str(), "FROM"))
+        if ((firstWord != "from") && (firstWord != "FROM"))
             return;
         //���catalog�б��Ƿ����
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         tableName = firstWord;
         if (!catalog.existTable(firstWord))  //!!!!!!!
@@ -182,18 +182,18 @@ void Interpreter::parseCommand(string &command) {
         //������������û��where�Ӿ䣬���ض�Ӧop
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";")) {
+        if ((firstWord == ";")) {
             op = SELECT_NOWHERE_CLAUSE;
             return;
         }
         //�����û�н������������word����where
-        if (strcmp(firstWord.c_str(), "where") && strcmp(firstWord.c_str(), "WHERE"))
+        if ((firstWord != "where") && (firstWord != "WHERE"))
             return;
         //����where��
         //�����һ������
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         condition.column1 = getColumnID(tableInfor, firstWord);  //��¼��һ������ֵ
         if (condition.column1 == -1)  //����������ڱ��в�����
@@ -205,43 +205,43 @@ void Interpreter::parseCommand(string &command) {
         //����ȽϷ���
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         //�ж��ȽϷ���
-        if (!strcmp(firstWord.c_str(), "<"))
+        if ((firstWord == "<"))
             condition.op1 = Lt;
-        else if (!strcmp(firstWord.c_str(), "<="))
+        else if ((firstWord == "<="))
             condition.op1 = Le;
-        else if (!strcmp(firstWord.c_str(), ">"))
+        else if ((firstWord == ">"))
             condition.op1 = Gt;
-        else if (!strcmp(firstWord.c_str(), ">="))
+        else if ((firstWord == ">="))
             condition.op1 = Ge;
-        else if (!strcmp(firstWord.c_str(), "="))
+        else if ((firstWord == "="))
             condition.op1 = Eq;
-        else if (!strcmp(firstWord.c_str(), "<>"))
+        else if ((firstWord == "<>"))
             condition.op1 = Ne;
         else
             return;
         //������Ƚ�ֵ
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         //�����''��ס���ַ���
-        if (!strcmp(firstWord.c_str(), "\'")) {
+        if ((firstWord == "\'")) {
             //����''֮����ַ�
             if (!getString(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             condition.value1 = firstWord;
             //�����һ��'
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             //�������Ĳ���'
-            if (strcmp(firstWord.c_str(), "\'"))
+            if ((firstWord != "\'"))
                 return;
         }
         //�������''��ס���ַ���
@@ -251,22 +251,22 @@ void Interpreter::parseCommand(string &command) {
         //�ж��ڶ�����������û�еڶ�������������condition�󷵻�
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";")) {
+        if ((firstWord == ";")) {
             op                 = SELECT_WHERE_CLAUSE;
             condition.relation = None;
             return;
         }
         //����еڶ���������ӦΪand��or
-        if (!strcmp(firstWord.c_str(), "and") || !strcmp(firstWord.c_str(), "AND"))
+        if ((firstWord == "and") || (firstWord == "AND"))
             condition.relation = And;
-        else if (!strcmp(firstWord.c_str(), "or") || !strcmp(firstWord.c_str(), "OR"))
+        else if ((firstWord == "or") || (firstWord == "OR"))
             condition.relation = Or;
         else
             return;
         //����ڶ�������
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         condition.column2 = getColumnID(tableInfor, firstWord);  //��¼��һ������ֵ
         if (condition.column2 == -1)  //����������ڱ��в�����
@@ -278,43 +278,43 @@ void Interpreter::parseCommand(string &command) {
         //����ȽϷ���
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         //�ж��ȽϷ���
-        if (!strcmp(firstWord.c_str(), "<"))
+        if ((firstWord == "<"))
             condition.op2 = Lt;
-        else if (!strcmp(firstWord.c_str(), "<="))
+        else if ((firstWord == "<="))
             condition.op2 = Le;
-        else if (!strcmp(firstWord.c_str(), ">"))
+        else if ((firstWord == ">"))
             condition.op2 = Gt;
-        else if (!strcmp(firstWord.c_str(), ">="))
+        else if ((firstWord == ">="))
             condition.op2 = Ge;
-        else if (!strcmp(firstWord.c_str(), "="))
+        else if ((firstWord == "="))
             condition.op2 = Eq;
-        else if (!strcmp(firstWord.c_str(), "<>"))
+        else if ((firstWord == "<>"))
             condition.op2 = Ne;
         else
             return;
         //������Ƚ�ֵ
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         //�����''��ס���ַ���
-        if (!strcmp(firstWord.c_str(), "\'")) {
+        if ((firstWord == "\'")) {
             //����''֮����ַ�
             if (!getString(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             condition.value2 = firstWord;
             //�����һ��'
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             //�������Ĳ���'
-            if (strcmp(firstWord.c_str(), "\'"))
+            if ((firstWord != "\'"))
                 return;
         }
         //�������''��ס���ַ���
@@ -323,24 +323,24 @@ void Interpreter::parseCommand(string &command) {
         }
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";")) {
+        if ((firstWord == ";")) {
             op = SELECT_WHERE_CLAUSE;
             return;
         }
     }
 
-    else if (!strcmp(firstWord.c_str(), "create") || !strcmp(firstWord.c_str(), "CREATE")) {
+    else if ((firstWord == "create") || (firstWord == "CREATE")) {
         op = CREATE_ERROR;
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         //�����create table
-        if (!strcmp(firstWord.c_str(), "table") || !strcmp(firstWord.c_str(), "TABLE")) {
+        if ((firstWord == "table") || (firstWord == "TABLE")) {
             op = CREATE_TABLE_ERROR;
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             tableName = firstWord;
             //�����Ѿ�����
@@ -351,68 +351,68 @@ void Interpreter::parseCommand(string &command) {
             tableInfor.name = firstWord;
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             //������Ĳ���(�����ش���
-            if (strcmp(firstWord.c_str(), "("))
+            if ((firstWord != "("))
                 return;
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
-            if (!strcmp(firstWord.c_str(), "unique") || !strcmp(firstWord.c_str(), "primary") ||
-                !strcmp(firstWord.c_str(), "UNIQUE") || !strcmp(firstWord.c_str(), "UNIQUE")) {
+            if ((firstWord == "unique") || (firstWord == "primary") || (firstWord == "UNIQUE") ||
+                (firstWord == "UNIQUE")) {
                 return;
             }
             Attribute tmpAttr;
             tmpAttr.name = firstWord;
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             //�ж���������
-            if (!strcmp(firstWord.c_str(), "int") || !strcmp(firstWord.c_str(), "INT")) {
+            if ((firstWord == "int") || (firstWord == "INT")) {
                 tmpAttr.type   = INT;
                 tmpAttr.length = INTLEN;
                 if (!getFirstWord(tmpCommand, firstWord))
                     return;
-                if (!strcmp(firstWord.c_str(), ";"))
+                if ((firstWord == ";"))
                     return;
-                if (!strcmp(firstWord.c_str(), "unique") || !strcmp(firstWord.c_str(), "UNIQUE")) {
+                if ((firstWord == "unique") || (firstWord == "UNIQUE")) {
                     tmpAttr.isUnique = 1;
                     if (!getFirstWord(tmpCommand, firstWord))
                         return;
-                    if (!strcmp(firstWord.c_str(), ";"))
+                    if ((firstWord == ";"))
                         return;
                 }
                 //ע���ʱ�����һ������
-            } else if (!strcmp(firstWord.c_str(), "float") || !strcmp(firstWord.c_str(), "FLOAT")) {
+            } else if ((firstWord == "float") || (firstWord == "FLOAT")) {
                 tmpAttr.type   = FLOAT;
                 tmpAttr.length = FLOATLEN;
                 if (!getFirstWord(tmpCommand, firstWord))
                     return;
-                if (!strcmp(firstWord.c_str(), ";"))
+                if ((firstWord == ";"))
                     return;
-                if (!strcmp(firstWord.c_str(), "unique") || !strcmp(firstWord.c_str(), "UNIQUE")) {
+                if ((firstWord == "unique") || (firstWord == "UNIQUE")) {
                     tmpAttr.isUnique = 1;
                     if (!getFirstWord(tmpCommand, firstWord))
                         return;
-                    if (!strcmp(firstWord.c_str(), ";"))
+                    if ((firstWord == ";"))
                         return;
                 }
-            } else if (!strcmp(firstWord.c_str(), "char") || !strcmp(firstWord.c_str(), "CHAR")) {
+            } else if ((firstWord == "char") || (firstWord == "CHAR")) {
                 tmpAttr.type = CHAR;
                 //����������
                 if (!getFirstWord(tmpCommand, firstWord))
                     return;
-                if (!strcmp(firstWord.c_str(), ";"))
+                if ((firstWord == ";"))
                     return;
-                if (strcmp(firstWord.c_str(), "("))
+                if ((firstWord != "("))
                     return;
                 //����char����
                 if (!getFirstWord(tmpCommand, firstWord))
                     return;
-                if (!strcmp(firstWord.c_str(), ";"))
+                if ((firstWord == ";"))
                     return;
                 tmpAttr.length = atoi(firstWord.c_str()) + 1;
                 if (tmpAttr.length > 255 || tmpAttr.length < 1) {
@@ -422,20 +422,20 @@ void Interpreter::parseCommand(string &command) {
                 //����������
                 if (!getFirstWord(tmpCommand, firstWord))
                     return;
-                if (!strcmp(firstWord.c_str(), ";"))
+                if ((firstWord == ";"))
                     return;
-                if (strcmp(firstWord.c_str(), ")"))
+                if ((firstWord != ")"))
                     return;
 
                 if (!getFirstWord(tmpCommand, firstWord))
                     return;
-                if (!strcmp(firstWord.c_str(), ";"))
+                if ((firstWord == ";"))
                     return;
-                if (!strcmp(firstWord.c_str(), "unique") || !strcmp(firstWord.c_str(), "UNIQUE")) {
+                if ((firstWord == "unique") || (firstWord == "UNIQUE")) {
                     tmpAttr.isUnique = 1;
                     if (!getFirstWord(tmpCommand, firstWord))
                         return;
-                    if (!strcmp(firstWord.c_str(), ";"))
+                    if ((firstWord == ";"))
                         return;
                 }
             } else {
@@ -446,30 +446,30 @@ void Interpreter::parseCommand(string &command) {
             tableInfor.attributes.push_back(tmpAttr);
             tmpAttr.isPrimaryKey = tmpAttr.isUnique = 0;
             //���ڶ�����Ի����primary key����
-            while (!strcmp(firstWord.c_str(), ",")) {
+            while ((firstWord == ",")) {
                 if (!getFirstWord(tmpCommand, firstWord))
                     return;
-                if (!strcmp(firstWord.c_str(), ";"))
+                if ((firstWord == ";"))
                     return;
                 //����primary key����
-                if (!strcmp(firstWord.c_str(), "primary") || !strcmp(firstWord.c_str(), "PRIMARY")) {
+                if ((firstWord == "primary") || (firstWord == "PRIMARY")) {
                     if (!getFirstWord(tmpCommand, firstWord))
                         return;
-                    if (!strcmp(firstWord.c_str(), ";"))
+                    if ((firstWord == ";"))
                         return;
                     //������Ĳ���key
-                    if (strcmp(firstWord.c_str(), "key") && strcmp(firstWord.c_str(), "KEY"))
+                    if ((firstWord != "key") && (firstWord != "KEY"))
                         return;
                     if (!getFirstWord(tmpCommand, firstWord))
                         return;
-                    if (!strcmp(firstWord.c_str(), ";"))
+                    if ((firstWord == ";"))
                         return;
                     //������Ĳ���(
-                    if (strcmp(firstWord.c_str(), "("))
+                    if ((firstWord != "("))
                         return;
                     if (!getFirstWord(tmpCommand, firstWord))
                         return;
-                    if (!strcmp(firstWord.c_str(), ";"))
+                    if ((firstWord == ";"))
                         return;
                     int primaryKeyInTable = 0;
                     for (unsigned int i = 0; i < tableInfor.attributes.size(); i++) {
@@ -485,64 +485,64 @@ void Interpreter::parseCommand(string &command) {
                     }
                     if (!getFirstWord(tmpCommand, firstWord))
                         return;
-                    if (!strcmp(firstWord.c_str(), ";"))
+                    if ((firstWord == ";"))
                         return;
                     //��δ����������
-                    if (strcmp(firstWord.c_str(), ")"))
+                    if ((firstWord != ")"))
                         return;
                     if (!getFirstWord(tmpCommand, firstWord))
                         return;
-                    if (!strcmp(firstWord.c_str(), ";"))
+                    if ((firstWord == ";"))
                         return;
                 } else {
                     tmpAttr.name = firstWord;
                     if (!getFirstWord(tmpCommand, firstWord))
                         return;
-                    if (!strcmp(firstWord.c_str(), ";"))
+                    if ((firstWord == ";"))
                         return;
                     //�ж���������
-                    if (!strcmp(firstWord.c_str(), "int") || !strcmp(firstWord.c_str(), "INT")) {
+                    if ((firstWord == "int") || (firstWord == "INT")) {
                         tmpAttr.type   = INT;
                         tmpAttr.length = INTLEN;
                         if (!getFirstWord(tmpCommand, firstWord))
                             return;
-                        if (!strcmp(firstWord.c_str(), ";"))
+                        if ((firstWord == ";"))
                             return;
-                        if (!strcmp(firstWord.c_str(), "unique") || !strcmp(firstWord.c_str(), "UNIQUE")) {
+                        if ((firstWord == "unique") || (firstWord == "UNIQUE")) {
                             tmpAttr.isUnique = 1;
                             if (!getFirstWord(tmpCommand, firstWord))
                                 return;
-                            if (!strcmp(firstWord.c_str(), ";"))
+                            if ((firstWord == ";"))
                                 return;
                         }
                         //ע���ʱ�����һ������
-                    } else if (!strcmp(firstWord.c_str(), "float") || !strcmp(firstWord.c_str(), "FLOAT")) {
+                    } else if ((firstWord == "float") || (firstWord == "FLOAT")) {
                         tmpAttr.type   = FLOAT;
                         tmpAttr.length = FLOATLEN;
                         if (!getFirstWord(tmpCommand, firstWord))
                             return;
-                        if (!strcmp(firstWord.c_str(), ";"))
+                        if ((firstWord == ";"))
                             return;
-                        if (!strcmp(firstWord.c_str(), "unique") || !strcmp(firstWord.c_str(), "UNIQUE")) {
+                        if ((firstWord == "unique") || (firstWord == "UNIQUE")) {
                             tmpAttr.isUnique = 1;
                             if (!getFirstWord(tmpCommand, firstWord))
                                 return;
-                            if (!strcmp(firstWord.c_str(), ";"))
+                            if ((firstWord == ";"))
                                 return;
                         }
-                    } else if (!strcmp(firstWord.c_str(), "char") || !strcmp(firstWord.c_str(), "CHAR")) {
+                    } else if ((firstWord == "char") || (firstWord == "CHAR")) {
                         tmpAttr.type = CHAR;
                         //����������
                         if (!getFirstWord(tmpCommand, firstWord))
                             return;
-                        if (!strcmp(firstWord.c_str(), ";"))
+                        if ((firstWord == ";"))
                             return;
-                        if (strcmp(firstWord.c_str(), "("))
+                        if ((firstWord != "("))
                             return;
                         //����char����
                         if (!getFirstWord(tmpCommand, firstWord))
                             return;
-                        if (!strcmp(firstWord.c_str(), ";"))
+                        if ((firstWord == ";"))
                             return;
                         tmpAttr.length = atoi(firstWord.c_str()) + 1;
                         if (tmpAttr.length > 255 || tmpAttr.length < 1) {
@@ -552,20 +552,20 @@ void Interpreter::parseCommand(string &command) {
                         //����������
                         if (!getFirstWord(tmpCommand, firstWord))
                             return;
-                        if (!strcmp(firstWord.c_str(), ";"))
+                        if ((firstWord == ";"))
                             return;
-                        if (strcmp(firstWord.c_str(), ")"))
+                        if ((firstWord != ")"))
                             return;
 
                         if (!getFirstWord(tmpCommand, firstWord))
                             return;
-                        if (!strcmp(firstWord.c_str(), ";"))
+                        if ((firstWord == ";"))
                             return;
-                        if (!strcmp(firstWord.c_str(), "unique") || !strcmp(firstWord.c_str(), "UNIQUE")) {
+                        if ((firstWord == "unique") || (firstWord == "UNIQUE")) {
                             tmpAttr.isUnique = 1;
                             if (!getFirstWord(tmpCommand, firstWord))
                                 return;
-                            if (!strcmp(firstWord.c_str(), ";"))
+                            if ((firstWord == ";"))
                                 return;
                         }
                     } else {
@@ -576,11 +576,11 @@ void Interpreter::parseCommand(string &command) {
                     tmpAttr.isPrimaryKey = tmpAttr.isUnique = 0;
                 }
             }
-            if (strcmp(firstWord.c_str(), ")"))
+            if ((firstWord != ")"))
                 return;
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";")) {
+            if ((firstWord == ";")) {
                 tableInfor.attriNum    = tableInfor.attributes.size();
                 tableInfor.totalLength = 0;
                 for (unsigned int i = 0; i < tableInfor.attributes.size(); i++) {
@@ -589,11 +589,11 @@ void Interpreter::parseCommand(string &command) {
                 op = CREATE_TABLE;
                 return;
             }
-        } else if (!strcmp(firstWord.c_str(), "index") || !strcmp(firstWord.c_str(), "INDEX")) {
+        } else if ((firstWord == "index") || (firstWord == "INDEX")) {
             op = CREATE_INDEX_ERROR;
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             indexName            = firstWord;
             indexInfor.indexName = firstWord;
@@ -603,14 +603,14 @@ void Interpreter::parseCommand(string &command) {
             }
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
-            if (strcmp(firstWord.c_str(), "on") && strcmp(firstWord.c_str(), "ON"))
+            if ((firstWord != "on") && (firstWord != "ON"))
                 return;
 
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             tableName = firstWord;
             if (!catalog.existTable(firstWord)) {
@@ -621,14 +621,14 @@ void Interpreter::parseCommand(string &command) {
             indexInfor.tableName = firstWord;
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
-            if (strcmp(firstWord.c_str(), "("))
+            if ((firstWord != "("))
                 return;
 
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             int tmpColumID = getColumnID(tableInfor, firstWord);
             if (tmpColumID == -1) {
@@ -645,13 +645,13 @@ void Interpreter::parseCommand(string &command) {
             indexInfor.columnLength = tableInfor.attributes[tmpColumID].length;
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
-            if (strcmp(firstWord.c_str(), ")"))
+            if ((firstWord != ")"))
                 return;
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";")) {
+            if ((firstWord == ";")) {
                 op = CREATE_INDEX;
                 return;
             }
@@ -659,14 +659,14 @@ void Interpreter::parseCommand(string &command) {
             return;
     }
 
-    else if (!strcmp(firstWord.c_str(), "delete") || !strcmp(firstWord.c_str(), "DELETE")) {
+    else if ((firstWord == "delete") || (firstWord == "DELETE")) {
         op = DELETE_ERROR;  // �﷨����
         getFirstWord(tmpCommand, firstWord);
-        if (strcmp(firstWord.c_str(), "from") && strcmp(firstWord.c_str(), "FROM"))
+        if ((firstWord != "from") && (firstWord != "FROM"))
             return;
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         //���catalog�б��Ƿ����
         tableName = firstWord;
@@ -679,18 +679,18 @@ void Interpreter::parseCommand(string &command) {
         //������������û��where�Ӿ䣬���ض�Ӧop
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";")) {
+        if ((firstWord == ";")) {
             op = DELETE_NOWHERE_CLAUSE;
             return;
         }
         //�����û�н������������word����where
-        if (strcmp(firstWord.c_str(), "where") && strcmp(firstWord.c_str(), "WHERE"))
+        if ((firstWord != "where") && (firstWord != "WHERE"))
             return;
         //����where��
         //�����һ������
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         condition.column1 = getColumnID(tableInfor, firstWord);  //��¼��һ������ֵ
         if (condition.column1 == -1)  //����������ڱ��в�����
@@ -702,43 +702,43 @@ void Interpreter::parseCommand(string &command) {
         //����ȽϷ���
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         //�ж��ȽϷ���
-        if (!strcmp(firstWord.c_str(), "<"))
+        if ((firstWord == "<"))
             condition.op1 = Lt;
-        else if (!strcmp(firstWord.c_str(), "<="))
+        else if ((firstWord == "<="))
             condition.op1 = Le;
-        else if (!strcmp(firstWord.c_str(), ">"))
+        else if ((firstWord == ">"))
             condition.op1 = Gt;
-        else if (!strcmp(firstWord.c_str(), ">="))
+        else if ((firstWord == ">="))
             condition.op1 = Ge;
-        else if (!strcmp(firstWord.c_str(), "="))
+        else if ((firstWord == "="))
             condition.op1 = Eq;
-        else if (!strcmp(firstWord.c_str(), "<>"))
+        else if ((firstWord == "<>"))
             condition.op1 = Ne;
         else
             return;
         //������Ƚ�ֵ
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         //�����''��ס���ַ���
-        if (!strcmp(firstWord.c_str(), "\'")) {
+        if ((firstWord == "\'")) {
             //����''֮����ַ�
             if (!getString(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             condition.value1 = firstWord;
             //�����һ��'
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             //�������Ĳ���'
-            if (strcmp(firstWord.c_str(), "\'"))
+            if ((firstWord != "\'"))
                 return;
         }
         //�������''��ס���ַ���
@@ -748,22 +748,22 @@ void Interpreter::parseCommand(string &command) {
         //�ж��ڶ�����������û�еڶ�������������condition�󷵻�
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";")) {
+        if ((firstWord == ";")) {
             op                 = DELETE_WHERE_CLAUSE;
             condition.relation = None;
             return;
         }
         //����еڶ���������ӦΪand��or
-        if (!strcmp(firstWord.c_str(), "and") || !strcmp(firstWord.c_str(), "AND"))
+        if ((firstWord == "and") || (firstWord == "AND"))
             condition.relation = And;
-        else if (!strcmp(firstWord.c_str(), "or") || !strcmp(firstWord.c_str(), "OR"))
+        else if ((firstWord == "or") || (firstWord == "OR"))
             condition.relation = Or;
         else
             return;
         //����ڶ�������
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         condition.column2 = getColumnID(tableInfor, firstWord);  //��¼��һ������ֵ
         if (condition.column2 == -1)  //����������ڱ��в�����
@@ -775,43 +775,43 @@ void Interpreter::parseCommand(string &command) {
         //����ȽϷ���
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         //�ж��ȽϷ���
-        if (!strcmp(firstWord.c_str(), "<"))
+        if ((firstWord == "<"))
             condition.op2 = Lt;
-        else if (!strcmp(firstWord.c_str(), "<="))
+        else if ((firstWord == "<="))
             condition.op2 = Le;
-        else if (!strcmp(firstWord.c_str(), ">"))
+        else if ((firstWord == ">"))
             condition.op2 = Gt;
-        else if (!strcmp(firstWord.c_str(), ">="))
+        else if ((firstWord == ">="))
             condition.op2 = Ge;
-        else if (!strcmp(firstWord.c_str(), "="))
+        else if ((firstWord == "="))
             condition.op2 = Eq;
-        else if (!strcmp(firstWord.c_str(), "<>"))
+        else if ((firstWord == "<>"))
             condition.op2 = Ne;
         else
             return;
         //������Ƚ�ֵ
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         //�����''��ס���ַ���
-        if (!strcmp(firstWord.c_str(), "\'")) {
+        if ((firstWord == "\'")) {
             //����''֮����ַ�
             if (!getString(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             condition.value2 = firstWord;
             //�����һ��'
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             //�������Ĳ���'
-            if (strcmp(firstWord.c_str(), "\'"))
+            if ((firstWord != "\'"))
                 return;
         }
         //�������''��ס���ַ���
@@ -820,21 +820,21 @@ void Interpreter::parseCommand(string &command) {
         }
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";")) {
+        if ((firstWord == ";")) {
             op = DELETE_WHERE_CLAUSE;
             return;
         }
         return;
     }
 
-    else if (!strcmp(firstWord.c_str(), "insert") || !strcmp(firstWord.c_str(), "INSERT")) {
+    else if ((firstWord == "insert") || (firstWord == "INSERT")) {
         op = INSERT_ERROR;
         getFirstWord(tmpCommand, firstWord);  // get "into"
-        if (strcmp(firstWord.c_str(), "into") && strcmp(firstWord.c_str(), "INTO"))
+        if ((firstWord != "into") && (firstWord != "INTO"))
             return;
         if (!getFirstWord(tmpCommand, firstWord))  // get tableName
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         // �õ����������Ϣ
         tableName = firstWord;
@@ -845,20 +845,20 @@ void Interpreter::parseCommand(string &command) {
         tableInfor = catalog.getTableInfor(tableName);
         if (!getFirstWord(tmpCommand, firstWord))  // get "values"
             return;
-        if (strcmp(firstWord.c_str(), "values") && strcmp(firstWord.c_str(), "VALUES"))
+        if ((firstWord != "values") && (firstWord != "VALUES"))
             return;
         getFirstWord(tmpCommand, firstWord);
-        if (strcmp(firstWord.c_str(), "("))
+        if ((firstWord != "("))
             return;
         if (!getFirstWord(tmpCommand, firstWord))
             return;
         int count = 0;
-        while (strcmp(firstWord.c_str(), ")")) {
-            if (!strcmp(firstWord.c_str(), ",")) {
+        while ((firstWord != ")")) {
+            if ((firstWord == ",")) {
                 getFirstWord(tmpCommand, firstWord);
                 continue;
             }
-            if (!strcmp(firstWord.c_str(), "'")) {
+            if ((firstWord == "'")) {
                 getString(tmpCommand, firstWord);
                 tmpCommand.erase(0, 1);
                 continue;
@@ -879,23 +879,23 @@ void Interpreter::parseCommand(string &command) {
         }
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";")) {
+        if ((firstWord == ";")) {
             op = INSERT;
             return;
         }
     }
 
-    else if (!strcmp(firstWord.c_str(), "drop") || !strcmp(firstWord.c_str(), "DROP")) {
+    else if ((firstWord == "drop") || (firstWord == "DROP")) {
         op = DROP_ERROR;
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
-        if (!strcmp(firstWord.c_str(), "table") || !strcmp(firstWord.c_str(), "TABLE")) {
+        if ((firstWord == "table") || (firstWord == "TABLE")) {
             op = DROP_TABLE_ERROR;
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             tableName = firstWord;
             if (!catalog.existTable(tableName)) {
@@ -905,16 +905,16 @@ void Interpreter::parseCommand(string &command) {
             tableInfor = catalog.getTableInfor(tableName);
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";")) {
+            if ((firstWord == ";")) {
                 op = DROP_TABLE;
                 return;
             }
             return;
-        } else if (!strcmp(firstWord.c_str(), "index") || !strcmp(firstWord.c_str(), "INDEX")) {
+        } else if ((firstWord == "index") || (firstWord == "INDEX")) {
             op = DROP_INDEX_ERROR;
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";"))
+            if ((firstWord == ";"))
                 return;
             indexName = firstWord;
             if (!catalog.existIndex(indexName)) {
@@ -923,7 +923,7 @@ void Interpreter::parseCommand(string &command) {
             }
             if (!getFirstWord(tmpCommand, firstWord))
                 return;
-            if (!strcmp(firstWord.c_str(), ";")) {
+            if ((firstWord == ";")) {
                 op = DROP_INDEX;
                 return;
             }
@@ -931,16 +931,16 @@ void Interpreter::parseCommand(string &command) {
         }
     }
 
-    else if (!strcmp(firstWord.c_str(), "execfile") || !strcmp(firstWord.c_str(), "EXECFILE")) {
+    else if ((firstWord == "execfile") || (firstWord == "EXECFILE")) {
         op = EXECFILE_ERROR;
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";"))
+        if ((firstWord == ";"))
             return;
         fileName = firstWord;
         if (!getFirstWord(tmpCommand, firstWord))
             return;
-        if (!strcmp(firstWord.c_str(), ";")) {
+        if ((firstWord == ";")) {
             op = EXECFILE;
             return;
         }

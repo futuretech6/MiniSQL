@@ -228,7 +228,7 @@ LeafIndex Leaf::pop() {
 void IndexManager::createIndex(const Table &tableInfo, Index &indexInfo) {
     // Create a new file
     string fileName = indexInfo.indexName + ".index";
-    fstream fout(fileName.c_str(), ios::out);
+    fstream fout(CACHE_FOLDER + fileName, ios::out);
     fout.close();
     // Create a root for the tree
     int blockID                          = buf.getEmptyBuffer();
@@ -535,7 +535,7 @@ string IndexManager::getColumnValue(const Table &tableInfo, const Index &indexIn
 
 void IndexManager::dropIndex(Index &indexInfo) {
     string fileName = indexInfo.indexName + ".index";
-    if (remove(fileName.c_str()) != 0)
+    if (remove((CACHE_FOLDER + fileName).c_str()) != 0)
         perror("Error deleting file");
     else
         buf.setInvalid(fileName);

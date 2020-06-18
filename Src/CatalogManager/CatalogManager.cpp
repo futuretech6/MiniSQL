@@ -3,8 +3,8 @@
 read table.catalog file and initialize the table list
 */
 void CatalogManager::LoadTableCatalog() {
-    const string filename = "table.catlog";
-    fstream fin(filename.c_str(), ios::in);
+    const string fileName = "table.catlog";
+    fstream fin(CACHE_FOLDER + fileName, ios::in);
     fin >> tableNum;
     for (int i = 0; i < tableNum; i++)  // read table information
     {
@@ -31,8 +31,8 @@ void CatalogManager::LoadTableCatalog() {
 read index.catalog file and initialize the index list
 */
 void CatalogManager::LoadIndexCatalog() {
-    const string filename = "index.catlog";
-    fstream fin(filename.c_str(), ios::in);
+    const string fileName = "index.catlog";
+    fstream fin(CACHE_FOLDER + fileName, ios::in);
     fin >> indexNum;
     for (int i = 0; i < indexNum; i++)  // read index information
     {
@@ -51,8 +51,8 @@ void CatalogManager::LoadIndexCatalog() {
 save the changes made during running
 */
 void CatalogManager::SaveTableCatalog() {
-    string filename = "table.catlog";
-    fstream fout(filename.c_str(), ios::out);
+    string fileName = "table.catlog";
+    fstream fout(CACHE_FOLDER + fileName, ios::out);
 
     fout << tableNum << endl;
     for (int i = 0; i < tableNum; i++) {
@@ -72,8 +72,8 @@ void CatalogManager::SaveTableCatalog() {
 }
 
 void CatalogManager::SaveIndexCatalog() {
-    string filename = "index.catlog";
-    fstream fout(filename.c_str(), ios::out);
+    string fileName = "index.catlog";
+    fstream fout(CACHE_FOLDER + fileName, ios::out);
     fout << indexNum << endl;
     for (int i = 0; i < indexNum; i++) {
         fout << indexes[i].indexName << " ";

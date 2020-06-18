@@ -1,0 +1,5 @@
+create table 身份(名字 char(20) unique, 年龄 int);
+
+insert into 身份 values('中文', 0);
+
+insert into 身份 values('🐂🍺', 1);

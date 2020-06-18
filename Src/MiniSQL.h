@@ -32,6 +32,10 @@ const char END             = '@';
 const char NOT_EMPTY       = '1';
 const char DELETED         = '@';
 
+const double UTF8_WIDTH = 1.5;
+
+#define CACHE_FOLDER "./.DBFILE/"
+
 const int MAX_PRIMARY_KEY_LENGTH = 25;
 
 // Interpreter: op field

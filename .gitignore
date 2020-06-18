@@ -5,7 +5,9 @@ bin
 *.exe
 *.out
 .vscode
-MiniSQL
+MiniSQL*
 *.table
 *.index
 *.zip
+.DBFILE
+Gen_out.txt

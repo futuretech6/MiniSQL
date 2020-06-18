@@ -82,7 +82,6 @@ class Leaf : public TreeNode {
 class IndexManager {
   public:
     void createIndex(const Table &tableInfo, Index &indexInfo);                      // Create Index
-    BranchIndex insertValue(Index &indexInfo, LeafIndex node, int blockOffset = 0);  // Insert value & update index
     Data selectEqual(const Table &tableInfo, const Index &indexInfo, string key,
         int blockOffset = 0);  // Selection of equality
     Data selectBetween(const Table &tableInfo, const Index &indexInfo, string keyFrom, string keyTo,
@@ -90,6 +89,7 @@ class IndexManager {
     void dropIndex(Index &indexInfo);  // Delete an index
 
   private:
+    BranchIndex insertValue(Index &indexInfo, LeafIndex node, int blockOffset = 0);  // Insert value & update index
     Row splitRow(Table tableInfo, string row);
     string getColumnValue(const Table &tableInfo, const Index &indexInfo, string row);
 };
