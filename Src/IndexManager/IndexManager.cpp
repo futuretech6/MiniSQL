@@ -493,7 +493,7 @@ Data IndexManager::selectBetween(
         } else {
             for (i = branch.indexList.begin(); i != branch.indexList.end(); i++)
                 if (i->key > keyFrom) {
-                    i--;  //�õ�(*i) ��ߵ�ָ���λ��
+                    i--;
                     break;
                 }
 
