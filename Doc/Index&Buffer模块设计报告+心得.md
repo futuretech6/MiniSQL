@@ -1,5 +1,7 @@
 # IndexManager
 
+程序的索引部分，直接利用BufferManager提供的索引结构和API提供的Index结构在API的Table结构上进行操作，底层的数据结构是B+树，负责实现构建/删除索引以及查询操作所需要的函数。
+
 ## Class
 
 BranchIndex：存储B+树非叶节点的index信息
@@ -23,6 +25,8 @@ LeafNode：B+树的叶节点
 `void dropIndex(Index &indexInfo);`：删除索引indexInfo
 
 # BufferManager
+
+负责缓冲区的管理，以块为单位进行磁盘的I/O，块的大小可以在MiniSQL.h中修改，默认是4KB。主要功能是将指定缓存块的数据写到磁盘或从磁盘读入，为了实现这个功能还需要如下子功能：实现缓冲区各块的状态刷新，包括是否是脏块、是否被锁定等等；在此基础上，结合计算机组成的知识，实现基于LRU的替换算法；
 
 ## Public Methods
 
